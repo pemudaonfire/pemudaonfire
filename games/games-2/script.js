@@ -8,6 +8,26 @@ const livesElement = document.getElementById('lives');
 const levelElement = document.getElementById('level');
 const startButton = document.getElementById('startButton');
 
+// Fungsi untuk set ukuran canvas responsif
+function resizeCanvas() {
+    const container = document.querySelector('.game-container');
+    const maxWidth = Math.min(800, window.innerWidth - 40);
+    const maxHeight = Math.min(600, window.innerHeight - 250);
+    
+    canvas.width = maxWidth;
+    canvas.height = maxHeight;
+    
+    // Update posisi paddle dan ball sesuai ukuran baru
+    if (!isGameRunning) {
+        paddle.y = canvas.height - PADDLE_HEIGHT - 10;
+        ball.y = paddle.y - BALL_RADIUS;
+    }
+}
+
+// Panggil resize saat load dan saat ukuran window berubah
+window.addEventListener('load', resizeCanvas);
+window.addEventListener('resize', resizeCanvas);
+
 // --- 2. VARIABEL & KONSTANTA GAME ---
 
 // Variabel Game
@@ -27,13 +47,19 @@ let ballSpeedX = 4;
 let ballSpeedY = -4;
 
 // Konstanta Brick
-const BRICK_WIDTH = 75;
-const BRICK_HEIGHT = 20;
 const BRICK_PADDING = 10;
 const BRICK_OFFSET_TOP = 60;
-const BRICK_OFFSET_LEFT = 35;
-const BRICK_ROWS = 5;
-const BRICK_COLUMNS = 9;
+
+// Fungsi untuk menghitung ukuran brick berdasarkan canvas
+function getBrickDimensions() {
+    const BRICK_COLUMNS = Math.floor(canvas.width / 85);
+    const BRICK_ROWS = Math.min(5, Math.floor((canvas.height - 150) / 35));
+    const BRICK_WIDTH = (canvas.width - (BRICK_COLUMNS + 1) * BRICK_PADDING) / BRICK_COLUMNS;
+    const BRICK_HEIGHT = 20;
+    const BRICK_OFFSET_LEFT = BRICK_PADDING;
+    
+    return { BRICK_WIDTH, BRICK_HEIGHT, BRICK_ROWS, BRICK_COLUMNS, BRICK_OFFSET_LEFT };
+}
 
 // --- 3. OBJEK GAME ---
 
@@ -62,6 +88,7 @@ let bricks = [];
 
 // Fungsi untuk membuat/menata ulang brick
 function createBricks() {
+    const { BRICK_ROWS, BRICK_COLUMNS } = getBrickDimensions();
     bricks = [];
     for (let r = 0; r < BRICK_ROWS; r++) {
         bricks[r] = [];
@@ -89,9 +116,10 @@ function drawBall() {
 
 // Fungsi untuk menggambar brick
 function drawBricks() {
+    const { BRICK_WIDTH, BRICK_HEIGHT, BRICK_ROWS, BRICK_COLUMNS, BRICK_OFFSET_LEFT } = getBrickDimensions();
     for (let r = 0; r < BRICK_ROWS; r++) {
         for (let c = 0; c < BRICK_COLUMNS; c++) {
-            if (bricks[r][c].status === 1) {
+            if (bricks[r] && bricks[r][c] && bricks[r][c].status === 1) {
                 const brickX = c * (BRICK_WIDTH + BRICK_PADDING) + BRICK_OFFSET_LEFT;
                 const brickY = r * (BRICK_HEIGHT + BRICK_PADDING) + BRICK_OFFSET_TOP;
                 bricks[r][c].x = brickX;
@@ -99,7 +127,7 @@ function drawBricks() {
                 
                 // Beri warna berbeda per baris
                 const colors = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#3498db'];
-                ctx.fillStyle = colors[r];
+                ctx.fillStyle = colors[r % colors.length];
                 ctx.fillRect(brickX, brickY, BRICK_WIDTH, BRICK_HEIGHT);
             }
         }
@@ -108,10 +136,11 @@ function drawBricks() {
 
 // Fungsi untuk deteksi tabrakan (Collision Detection)
 function collisionDetection() {
+    const { BRICK_WIDTH, BRICK_HEIGHT, BRICK_ROWS, BRICK_COLUMNS } = getBrickDimensions();
     for (let r = 0; r < BRICK_ROWS; r++) {
         for (let c = 0; c < BRICK_COLUMNS; c++) {
-            const b = bricks[r][c];
-            if (b.status === 1) {
+            const b = bricks[r] && bricks[r][c];
+            if (b && b.status === 1) {
                 if (ball.x > b.x && ball.x < b.x + BRICK_WIDTH && ball.y > b.y && ball.y < b.y + BRICK_HEIGHT) {
                     ball.speedY = -ball.speedY; // Balik arah Y
                     b.status = 0; // Hancurkan brick
@@ -119,7 +148,8 @@ function collisionDetection() {
                     scoreElement.innerText = score;
 
                     // Cek apakah semua brick sudah hancur
-                    if (score === BRICK_ROWS * BRICK_COLUMNS * 10 * level) {
+                    const totalBricks = BRICK_ROWS * BRICK_COLUMNS;
+                    if (score === totalBricks * 10 * level) {
                         levelUp();
                     }
                 }
@@ -208,6 +238,10 @@ function gameLoop() {
         }
     }
 
+    // Batasi paddle agar tidak keluar canvas
+    if (paddle.x < 0) paddle.x = 0;
+    if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+
     // Lanjutkan ke frame berikutnya
     requestAnimationFrame(gameLoop);
 }
@@ -238,16 +272,35 @@ function startGame() {
 // Kontrol paddle dengan mouse
 canvas.addEventListener('mousemove', (e) => {
     if (!isGameRunning) return;
-    const relativeX = e.clientX - canvas.offsetLeft;
+    const rect = canvas.getBoundingClientRect();
+    const relativeX = e.clientX - rect.left;
     if (relativeX > PADDLE_WIDTH / 2 && relativeX < canvas.width - PADDLE_WIDTH / 2) {
         paddle.x = relativeX - PADDLE_WIDTH / 2;
     }
+});
+
+// Kontrol paddle dengan touch (untuk mobile)
+canvas.addEventListener('touchmove', (e) => {
+    if (!isGameRunning) return;
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const relativeX = touch.clientX - rect.left;
+    if (relativeX > PADDLE_WIDTH / 2 && relativeX < canvas.width - PADDLE_WIDTH / 2) {
+        paddle.x = relativeX - PADDLE_WIDTH / 2;
+    }
+});
+
+// Prevent default touch behavior
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
 });
 
 // Tombol untuk memulai
 startButton.addEventListener('click', startGame);
 
 // Inisialisasi awal (gambar brick di layar start)
+resizeCanvas();
 createBricks();
 drawBricks();
 drawPaddle();

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labirin 3D Isometrik</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 LABIRIN 3D ISOMETRIK 🧩</h1>
+        
+        <div class="game-info">
+            <div class="stat">
+                <span class="label">Level:</span>
+                <span id="level" class="value">1</span>
+            </div>
+            <div class="stat">
+                <span class="label">Langkah:</span>
+                <span id="steps" class="value">0</span>
+            </div>
+            <div class="stat">
+                <span class="label">Waktu:</span>
+                <span id="time" class="value">0:00</span>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div class="controls">
+            <button id="startButton">Mulai Game</button>
+            <button id="resetButton" disabled>Reset Level</button>
+            <button id="nextLevelButton" disabled>Level Berikutnya</button>
+        </div>
+
+        <div class="arrow-controls">
+            <div class="arrow-row">
+                <button class="arrow-btn" id="btnUp">↑</button>
+            </div>
+            <div class="arrow-row">
+                <button class="arrow-btn" id="btnLeft">←</button>
+                <button class="arrow-btn" id="btnDown">↓</button>
+                <button class="arrow-btn" id="btnRight">→</button>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Cara Bermain:</h3>
+            <p><strong>Desktop:</strong> Gunakan tombol <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> atau <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></p>
+            <p><strong>Mobile:</strong> Gunakan tombol panah di bawah canvas</p>
+            <p><strong>Tujuan:</strong> Temukan jalan keluar dari labirin! 🚩 Kumpulkan bintang ⭐ untuk bonus!</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

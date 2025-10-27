@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Catur</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>♔ Game Catur ♚</h1>
+        
+        <div class="game-info">
+            <div class="player-info">
+                <span id="current-player">Giliran: <strong>Putih</strong></span>
+            </div>
+            <div class="status-info">
+                <span id="game-status">Mulai permainan!</span>
+            </div>
+        </div>
+
+        <div id="chessboard"></div>
+
+        <div class="controls">
+            <button id="resetButton">Mulai Ulang</button>
+            <button id="undoButton">Undo</button>
+        </div>
+
+        <div class="captured-pieces">
+            <div class="captured-white">
+                <h3>Bidak Putih Tertangkap:</h3>
+                <div id="captured-white"></div>
+            </div>
+            <div class="captured-black">
+                <h3>Bidak Hitam Tertangkap:</h3>
+                <div id="captured-black"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
